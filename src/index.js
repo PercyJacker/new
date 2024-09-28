@@ -9,6 +9,13 @@ const app=express()
 
 
 
+connectDB()
+.then(() => {
+    app.listen(process.env.PORT || 8000,()=>{`server is running PORT ${process.env.PORT}`})
+}).catch((err) => {
+    console.log("connectDB failed",err);
+    
+});
 
 
 

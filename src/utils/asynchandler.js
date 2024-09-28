@@ -1,7 +1,7 @@
 //method banke export krte h idhar
 
 //!method1 for async handler
-//function ke andar ek aur function and a callback{}
+//function ke andar ek aur function and then a callback{}
 const asynchandler= (fn)=>{async()=>{
     try {
         await fn(req,res,next)
