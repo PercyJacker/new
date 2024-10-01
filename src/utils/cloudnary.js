@@ -2,9 +2,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs";
 
     cloudinary.config({ 
-        cloud_name: 'process.env.CLOUDNARY_CLOUD_NAME', 
-        api_key: 'process.env.CLOUDNARY_API_KEY', 
-        api_secret: 'process.env.CLOUDNARY_API_SECRET' // Click 'View API Keys' above to copy your API secret
+        cloud_name: process.env.CLOUDNARY_CLOUD_NAME, 
+        api_key: process.env.CLOUDNARY_API_KEY, 
+        api_secret: process.env.CLOUDNARY_API_SECRET // Click 'View API Keys' above to copy your API secret
     });
 
 
@@ -16,11 +16,12 @@ import fs from "fs";
                 resource_type :"auto"
             })
             //file upload ho gya
-            console.log("ho gya upload",response.url);
+            // console.log("ho gya upload",response.url);
+            fs.unlinkSync(localFilePath)
             return response;
         } catch (error) {
             //khuda na khasta age fail hua toh corrupted file ko nikalo
-            fs.unlinkSync(localFilePath)
+            fs.promises.unlinkSync(localFilePath)
             return null;
         }
     }

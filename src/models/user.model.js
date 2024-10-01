@@ -31,7 +31,7 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
-    coverimage:{
+    coverImage:{
         type:String,
 
     },
@@ -64,7 +64,7 @@ userSchema.pre("save", async function(next){
 
     
     //encrypt the password using hash with 8 rounds
-    this.password =bcrypt.hash(this.password, 8)
+    this.password =await bcrypt.hash(this.password, 8)
     next()
 } )
 
@@ -107,4 +107,4 @@ userSchema.methods.generateRefreshToken= function(){
 }
 
 
-export const user = mongoose.model("user" , userSchema)
+export const User = mongoose.model("User" , userSchema)

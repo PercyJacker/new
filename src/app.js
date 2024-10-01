@@ -29,6 +29,8 @@ app.use(cookieparser())
 console.log("Middleware for parsing, static files, and cookies set up"); // Log that all middlewares are set
 
 
+//!mian algorihtm
+
 //routes import ho rhi
 import userRouter from "./routes/user.route.js"
 
