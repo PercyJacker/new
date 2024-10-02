@@ -1,7 +1,10 @@
+//this is where the routes are stored
+
 import {  Router } from "express";
-import {registerUser} from "../controllers/user.controller.js";
+import {loginUser, logoutUser, refreshAccessToken, registerUser} from "../controllers/user.controller.js";
 import { uploadOnCloudnary } from "../utils/cloudnary.js";
 import { upload } from "../middleware/multer.middleware.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const router= Router();
 console.log("Register route initialized"); // Log when the route is initialized
@@ -21,6 +24,12 @@ router.route("/register").post(
         }
     ]),registerUser
 )
+router.route("/login" ).post(loginUser)
 
+router.route("/logout", logoutUser)
+
+//secured routes
+router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/refresh-token").post(refreshAccessToken)
 
 export default router ;

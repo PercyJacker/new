@@ -69,10 +69,10 @@ userSchema.pre("save", async function(next){
 } )
 
 //here we are making our own method isPasswordCorrect to check the password is correct
-userSchema.methods.isPasswordCorrect =async function
-(password){
-    return await bcrypt.compare(password, this.password)
+userSchema.methods.isPasswordCorrect = async function(password) {
+    return await bcrypt.compare(password, this.password);
 }
+
 
 
 //this method will generate access token 
