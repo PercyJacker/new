@@ -1,3 +1,6 @@
+//here we connect mongoose database to our database 
+
+
 import { mongoose } from "mongoose";
 import { DB_name } from "../constants.js";
 

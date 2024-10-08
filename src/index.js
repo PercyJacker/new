@@ -1,4 +1,4 @@
-
+//here connect db to the port
 
 import dotenv from 'dotenv'
 import mongoose, { connect } from "mongoose";

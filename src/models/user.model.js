@@ -1,3 +1,7 @@
+//here we setup mongoose model of user
+//then make a save hook using bcrypt
+//then make some method using jwt bcrypt 
+
 import mongoose,{Schema} from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"

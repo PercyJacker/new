@@ -1,6 +1,12 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs";
 
+//!main algo
+//Cloudinary Configuration:
+//uploadOnCloudnary function takes the path to a local file (localFilePath), uploads it to Cloudinary, and deletes the local file afterward.
+//Return the Cloudinary Response:
+
+
     cloudinary.config({ 
         cloud_name: process.env.CLOUDNARY_CLOUD_NAME, 
         api_key: process.env.CLOUDNARY_API_KEY, 

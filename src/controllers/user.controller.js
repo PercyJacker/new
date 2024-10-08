@@ -1,4 +1,5 @@
-//so here we will 
+//so here we will make every feature by importing many things from middleware , utils and packages and export it to routes 
+//
 
 
 import { asynchandler } from "../utils/asynchandler.js";
@@ -15,13 +16,17 @@ import { channel } from "diagnostics_channel";
 
 const generateAccessAndRefreshToken = async(userId)=>{
     try {
+        //find a user in the database using the userId
         const user = await User.findById(userId)
+        //call method from user and assign to accestoken
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
         
+        //update the refreshToken field without triggering other validation logic.
         user.refreshToken = refreshToken
         await user.save({validateBeforeSave:false})
 
+        //These tokens are returned to the caller for further use
         return{accessToken, refreshToken}
 
     } catch (error) {
@@ -34,7 +39,7 @@ const generateAccessAndRefreshToken = async(userId)=>{
 
 const registerUser = asynchandler(async (req, res )=>{
     console.log("registerUser route hit"); // This will confirm the function is being called
-    console.log("Request body: ", req.body); // Log the request body to check data received
+    console.log("Request body: ", req.body); // logs the data coming from the client side
     //!main algo
     // get User details from frontend
     // validation - not empty
@@ -50,13 +55,15 @@ const registerUser = asynchandler(async (req, res )=>{
     console.log("email:",email);
 
     if (
-        //if any feild is missing
+        //if any feild is missing then trim some extra spaces between feilds
         [fullname , email , password , username ].some((feild)=>
             feild?.trim() === "")
     ){
         throw new ApiError (400 ,"all feild are required" )
     }
+    //check if there is any user also exist model(moongoose) with same username and email
     const existedUser = await User.findOne({
+        //? $or is an operateor
         $or : [{username},{email}]
     })
 
@@ -64,7 +71,7 @@ const registerUser = asynchandler(async (req, res )=>{
         throw new ApiError(409, "User with email or username already exists")
     }
     console.log(req.files);
-//here we can req files
+//in coverImagePath see if there is req.file agr h thn see is there any coverImage agr h then see uska first property agr h then get its path 
 const coverImagePath = await req.files?.coverImage?.[0]?.path;
 const avatarLocalPath = await req.files?.avatar?.[0]?.path;
 
@@ -92,13 +99,16 @@ console.log("Cover Image Path: ", coverImagePath);
 
     }
 //?object ke liye  ye {}  wal bracket
+//const 
     const newUser =User.create({
         fullname,
+        //use cloudinay url
         avatar:avatar.url,
         //agr optional toh left empty
         coverImage:coverImage?.url || " ",
         email,
         password,
+        //convert it to lower case 
         username:username.toLowerCase()
     })
 
@@ -121,7 +131,11 @@ console.log("Cover Image Path: ", coverImagePath);
     
 })
 
-    //!here we start login page
+   
+
+
+const loginUser = asynchandler(async(req, res )=>{
+     //!here we start login page
     //!main algo
     //take mail ,username, pass
     //show error there is no username or email
@@ -131,14 +145,14 @@ console.log("Cover Image Path: ", coverImagePath);
     //send cookies
 
 
-const loginUser = asynchandler(async(req, res )=>{
-
     const {email ,username, password} = req.body
 
+    //check if there is any username or email
     if (!(username || email)) {
         throw new ApiError (400,"username or email is required")
     }
 
+    //find user with their username or email
     const user =await User.findOne({
         $or :[{username},{email}]
     })
@@ -154,14 +168,19 @@ const loginUser = asynchandler(async(req, res )=>{
         throw new ApiError("invalid password")
     }
 
+    //?The refresh token allows the user to obtain a new access token when the old one expires.
+    //?the access token allows the user to access for short period of tym
     const {accessToken, refreshToken} =await 
     generateAccessAndRefreshToken(user._id)
 
     const loggedInUser = await User.findOne(user._id).select
     ("-password -refreshToken")
 
+    //?This object defines options for the cookies
     const option = {
+        //ensures that the cookie is only accessible by the server
         httpOnly :true,
+        //ensures that the cookie is only sent over HTTPS.
         secure : true
     }
 
@@ -171,7 +190,9 @@ const loginUser = asynchandler(async(req, res )=>{
     .cookie("refreshToken", refreshToken)
     .json(
         new ApiResponse(
+            //send a json that includes status code the user ka loggedInUser, accessToken, refreshToken and a message
             200,
+
             {
                 user:loggedInUser, accessToken, refreshToken
             },
@@ -191,11 +212,13 @@ const logoutUser = asynchandler(async(req, res)=>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
+            //set refresh token undefined... basicaly delete
             $set:{
                 refreshToken:undefined
             }
         },
-        {
+
+        {//return the object after completing removing token
             new: true
         }
 
@@ -215,6 +238,7 @@ const logoutUser = asynchandler(async(req, res)=>{
 
 //!refresh token
 const refreshAccessToken = asynchandler(async(req, res)=>{
+    //retrieve the refreshToken either from cookie or body
     const incomingRefreshToken = req.cookie.
     refreshToken || req.body.refreshToken
 
@@ -222,11 +246,12 @@ const refreshAccessToken = asynchandler(async(req, res)=>{
         throw new ApiError(401, "unauthorised request")
     }
 
+    //Verifying the Refresh Token
     const decodedToken =jwt.verify(
         incomingRefreshToken,
         process.env.REFRESH_TOKEN_SECRET
     )
-
+        //find user from decoded token ke andar ka id h
     const user =User.findById(decodedToken?._id)
 
     if(!user){
@@ -241,7 +266,7 @@ const refreshAccessToken = asynchandler(async(req, res)=>{
         httpOnly:true,
         secure:true
     }
-
+//Generating New Tokens
     const {accessToken, newRefreshToken}=await generateAccessAndRefreshToken(user._id)
 
     return res
@@ -276,7 +301,9 @@ const changeCurrentPassword = asynchandler(async(req, res)=>{
     }
 
     {
+        
         user.password=newPassword
+        //save changes without triggreing validation
         await user.save({validateBeforeSave:false})
 
         return res
@@ -313,7 +340,7 @@ const updateAccountDetails = asynchandler(async(req, res)=>{
             }
         },
         {new : true}
-
+        //we are putting this in json user and we dont want to show it there that y we dont we dont want this shiii..
     ).select("-password")
 
 return res
@@ -322,6 +349,10 @@ return res
 })
 
 const updateUserAvatar = asynchandler(async(req, res)=>{
+
+    //!main algo
+
+
     const avatarLocalPath=req.files?.path
 
     if (!avatarLocalPath) {
@@ -353,6 +384,17 @@ const updateUserAvatar = asynchandler(async(req, res)=>{
 
 
 const userCoverImage=asynchandler(async(req, res)=>{
+
+    //!main algo
+    //1. Extracting the Cover Image Path
+    //2. Validation: Check for the Presence of Cover Image
+    //3. Upload the Cover Image to Cloudinary
+    //4. Check for Successful Upload
+    //5. Update the User Document in the Database
+    //
+
+
+
 const coverImagePath=req.files?.path
 
 if (!coverImagePath) {
@@ -360,17 +402,20 @@ if (!coverImagePath) {
     
 }
 
-const coverImage=uploadOnCloudnary(avatarLocalPath)
+//upload coverImagePath in cloudnary assgine it to coverImage
+const coverImage=uploadOnCloudnary(coverImagePath)
 
 if (!coverImage.url) {
     throw new ApiError(400, "error while uploading on avatar ")
 }
 
+//find the user using its id and 
 const user = await User.findByIdAndUpdate(
     req.user?.id,
     {
+        //update cover image
         $set:{
-            avatar:coverImage.url
+            coverImage:coverImage.url
         }
     },
     {new : true}
@@ -384,11 +429,19 @@ return res
 
 
 const getUserChannelProfile = asynchandler(async(req, res)=>{
+
+    //!mian algo
+
+
+
+    //Extracting username from req.params
     const{username} =req.params
 
     if (!username) {
         throw new ApiError(400, "username is missing")
     }
+
+    
     const channel = await User.aggregate([
         {
             $match:{

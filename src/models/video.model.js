@@ -1,3 +1,6 @@
+//here we setup mongoose model of video
+
+
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregate from "mongoose-aggregate-paginate-v2";
 

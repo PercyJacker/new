@@ -1,3 +1,5 @@
+//here we setup everything the .env, cors, express, cookie-pareser, routes
+
 import  dotenv  from "dotenv";
 import  Express  from "express";
 import cookieparser from 'cookie-parser'
